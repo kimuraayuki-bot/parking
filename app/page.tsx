@@ -4,6 +4,7 @@ import { useEffect, useMemo, useState } from 'react';
 import { fetchAvailability } from '@/lib/web-client';
 import { formatTimeRange, todayJstDateString } from '@/lib/date';
 import type { Reservation } from '@/lib/types';
+import { toJapaneseError } from '@/lib/error-ja';
 
 export default function HomePage() {
   const [date, setDate] = useState(todayJstDateString());
@@ -18,7 +19,7 @@ export default function HomePage() {
       setError('');
       const result = await fetchAvailability(date);
       if (!result.ok) {
-        setError(`${result.error.code}: ${result.error.message}`);
+        setError(toJapaneseError(result.error));
         setSlots([]);
         setReservations([]);
       } else {

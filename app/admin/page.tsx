@@ -4,6 +4,7 @@ import { FormEvent, useState } from 'react';
 import { adminBlock, adminList } from '@/lib/web-client';
 import { todayJstDateString, toIsoWithJstOffset } from '@/lib/date';
 import { Reservation } from '@/lib/types';
+import { toJapaneseError } from '@/lib/error-ja';
 
 export default function AdminPage() {
   const today = todayJstDateString();
@@ -26,7 +27,7 @@ export default function AdminPage() {
     setItems([]);
     const result = await adminList({ dateFrom, dateTo, adminKey });
     if (!result.ok) {
-      setError(`${result.error.code}: ${result.error.message}`);
+      setError(toJapaneseError(result.error));
     } else {
       setItems(result.data.items);
     }
@@ -46,7 +47,7 @@ export default function AdminPage() {
       adminKey
     });
     if (!result.ok) {
-      setError(`${result.error.code}: ${result.error.message}`);
+      setError(toJapaneseError(result.error));
     } else {
       setBlockMessage(`BLOCKEDを作成しました。ID: ${result.data.id}`);
     }

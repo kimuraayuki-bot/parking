@@ -3,6 +3,7 @@
 import { FormEvent, useState } from 'react';
 import { createReservation } from '@/lib/web-client';
 import { toIsoWithJstOffset } from '@/lib/date';
+import { toJapaneseError } from '@/lib/error-ja';
 
 const SLOT_COUNT = 16;
 
@@ -31,7 +32,7 @@ export default function ReservePage() {
       note
     });
     if (!result.ok) {
-      setError(`${result.error.code}: ${result.error.message}`);
+      setError(toJapaneseError(result.error));
     } else {
       setReservedId(result.data.id);
     }

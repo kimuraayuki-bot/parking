@@ -2,6 +2,7 @@
 
 import { FormEvent, useState } from 'react';
 import { cancelReservation } from '@/lib/web-client';
+import { toJapaneseError } from '@/lib/error-ja';
 
 export default function CancelPage() {
   const [id, setId] = useState('');
@@ -16,7 +17,7 @@ export default function CancelPage() {
     setSuccess('');
     const result = await cancelReservation(id.trim());
     if (!result.ok) {
-      setError(`${result.error.code}: ${result.error.message}`);
+      setError(toJapaneseError(result.error));
     } else {
       setSuccess(`予約ID ${result.data.id} を取消しました。`);
     }
