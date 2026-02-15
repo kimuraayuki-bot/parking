@@ -3,6 +3,7 @@ const SHEET_SLOTS = 'Slots';
 const SHEET_RESERVATIONS = 'Reservations';
 const SHEET_SETTINGS = 'Settings';
 const SHEET_LOGS = 'Logs';
+const FIXED_TIME_STEP_MIN = 30;
 
 function doGet(e) {
   return handleRequest_('GET', e);
@@ -120,6 +121,7 @@ function getAvailability_(dateStr) {
         endAt: toIsoJst_(r.endAtDate),
         status: r.status,
         name: r.name,
+        roomNumber: r.roomNumber,
         note: r.note
       };
     });
@@ -149,6 +151,7 @@ function createReservation_(input, actorType) {
       status: 'CONFIRMED',
       name: payload.name,
       contact: payload.contact,
+      roomNumber: payload.roomNumber,
       note: payload.note || '',
       createdAt: now,
       canceledAt: '',
@@ -199,9 +202,9 @@ function cancelReservation_(input, actorType) {
   }
 
   const now = new Date();
-  sheet.getRange(target.rowIndex, 5).setValue('CANCELED');
-  sheet.getRange(target.rowIndex, 10).setValue(toIsoJst_(now));
-  sheet.getRange(target.rowIndex, 12).setValue(toIsoJst_(now));
+  setCellByHeader_(sheet, target.rowIndex, 'status', 'CANCELED');
+  setCellByHeader_(sheet, target.rowIndex, 'canceledAt', toIsoJst_(now));
+  setCellByHeader_(sheet, target.rowIndex, 'updatedAt', toIsoJst_(now));
   appendLog_(actorType, 'cancel', { id: id });
   return { id: id, status: 'CANCELED' };
 }
@@ -234,6 +237,7 @@ function adminBlock_(input) {
       endAt: input.endAt,
       name: 'BLOCK',
       contact: 'ADMIN',
+      roomNumber: '-',
       note: input.reason || ''
     },
     settings
@@ -254,6 +258,7 @@ function adminBlock_(input) {
       status: 'BLOCKED',
       name: 'BLOCK',
       contact: 'ADMIN',
+      roomNumber: '-',
       note: payload.note || '',
       createdAt: now,
       canceledAt: '',
@@ -292,15 +297,16 @@ function validateCreateLikeInput_(input, settings) {
     throw appError_('VALIDATION_ERROR', 'Duration is out of allowed range');
   }
 
-  const stepMin = toInt_(settings.TIME_STEP_MIN, 30);
+  const stepMin = FIXED_TIME_STEP_MIN;
   if (!isStepAligned_(startAt, stepMin) || !isStepAligned_(endAt, stepMin)) {
     throw appError_('VALIDATION_ERROR', `Time must be aligned to ${stepMin} minute steps`);
   }
 
   const name = (input.name || '').toString().trim();
   const contact = (input.contact || '').toString().trim();
-  if (!name || !contact) {
-    throw appError_('VALIDATION_ERROR', 'name and contact are required');
+  const roomNumber = (input.roomNumber || '').toString().trim();
+  if (!name || !contact || !roomNumber) {
+    throw appError_('VALIDATION_ERROR', 'name, contact and roomNumber are required');
   }
 
   const isActive = isSlotActive_(slotId);
@@ -314,6 +320,7 @@ function validateCreateLikeInput_(input, settings) {
     endAt: endAt,
     name: name,
     contact: contact,
+    roomNumber: roomNumber,
     note: (input.note || '').toString().trim()
   };
 }
@@ -339,20 +346,42 @@ function overlaps_(aStart, aEnd, bStart, bEnd) {
 
 function appendReservationRow_(record) {
   const sheet = getRequiredSheet_(SHEET_RESERVATIONS);
-  sheet.appendRow([
-    record.id,
-    record.slotId,
-    toIsoJst_(record.startAt),
-    toIsoJst_(record.endAt),
-    record.status,
-    record.name,
-    record.contact,
-    record.note || '',
-    toIsoJst_(record.createdAt),
-    record.canceledAt || '',
-    record.createdBy,
-    toIsoJst_(record.updatedAt)
-  ]);
+  const lastColumn = sheet.getLastColumn();
+  const headers = sheet.getRange(1, 1, 1, lastColumn).getValues()[0];
+  const row = headers.map(function (header) {
+    const h = (header || '').toString().trim();
+    switch (h) {
+      case 'id':
+        return record.id;
+      case 'slotId':
+        return record.slotId;
+      case 'startAt':
+        return toIsoJst_(record.startAt);
+      case 'endAt':
+        return toIsoJst_(record.endAt);
+      case 'status':
+        return record.status;
+      case 'name':
+        return record.name;
+      case 'contact':
+        return record.contact;
+      case 'roomNumber':
+        return record.roomNumber || '';
+      case 'note':
+        return record.note || '';
+      case 'createdAt':
+        return toIsoJst_(record.createdAt);
+      case 'canceledAt':
+        return record.canceledAt || '';
+      case 'createdBy':
+        return record.createdBy;
+      case 'updatedAt':
+        return toIsoJst_(record.updatedAt);
+      default:
+        return '';
+    }
+  });
+  sheet.appendRow(row);
 }
 
 function appendLog_(actor, action, payload) {
@@ -378,6 +407,7 @@ function getReservations_() {
         status: r.status,
         name: r.name || '',
         contact: r.contact || '',
+        roomNumber: r.roomNumber || '',
         note: r.note || '',
         createdAt: r.createdAt || '',
         canceledAt: r.canceledAt || '',
@@ -458,6 +488,28 @@ function readSheetObjects_(sheet) {
   return out;
 }
 
+function setCellByHeader_(sheet, rowIndex, headerName, value) {
+  const colIndex = getColumnIndexByHeader_(sheet, headerName);
+  if (!colIndex) {
+    throw appError_('INTERNAL', `Column not found: ${headerName}`);
+  }
+  sheet.getRange(rowIndex, colIndex).setValue(value);
+}
+
+function getColumnIndexByHeader_(sheet, headerName) {
+  const lastColumn = sheet.getLastColumn();
+  if (!lastColumn) {
+    return null;
+  }
+  const headers = sheet.getRange(1, 1, 1, lastColumn).getValues()[0];
+  for (let i = 0; i < headers.length; i++) {
+    if ((headers[i] || '').toString().trim() === headerName) {
+      return i + 1;
+    }
+  }
+  return null;
+}
+
 function serializeReservation_(r) {
   return {
     id: r.id,
@@ -467,6 +519,7 @@ function serializeReservation_(r) {
     status: r.status,
     name: r.name,
     contact: r.contact,
+    roomNumber: r.roomNumber,
     note: r.note,
     createdAt: r.createdAt,
     canceledAt: r.canceledAt,

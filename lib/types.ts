@@ -23,6 +23,7 @@ export type Reservation = {
   status: 'CONFIRMED' | 'CANCELED' | 'BLOCKED';
   name: string;
   contact?: string;
+  roomNumber?: string;
   note?: string;
   createdAt?: string;
   canceledAt?: string;

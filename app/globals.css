@@ -173,6 +173,53 @@ table {
   overflow-x: auto;
 }
 
+.timetable-wrap {
+  overflow-x: auto;
+}
+
+.timetable {
+  border-collapse: collapse;
+  width: max-content;
+  min-width: 100%;
+}
+
+.timetable th,
+.timetable td {
+  border: 1px solid var(--line);
+  padding: 0;
+  text-align: center;
+  white-space: nowrap;
+}
+
+.timetable th {
+  font-size: 11px;
+  padding: 4px 6px;
+  background: #f7f9fd;
+}
+
+.slot-head {
+  min-width: 72px;
+  background: #f7f9fd;
+  font-weight: 700;
+}
+
+.cell {
+  width: 16px;
+  height: 20px;
+}
+
+.cell.free {
+  background: #ffffff;
+}
+
+.cell.reserved {
+  background: #8ec6ff;
+}
+
+.cell.blocked {
+  background: #b4bcc8;
+}
+
 th,
 td {
   border-bottom: 1px solid var(--line);

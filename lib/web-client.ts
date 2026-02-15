@@ -11,6 +11,7 @@ export async function createReservation(input: {
   endAt: string;
   name: string;
   contact: string;
+  roomNumber: string;
   note: string;
 }) {
   const res = await fetch('/api/create', {

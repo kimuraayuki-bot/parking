@@ -13,6 +13,7 @@ export default function ReservePage() {
   const [endAt, setEndAt] = useState('');
   const [name, setName] = useState('');
   const [contact, setContact] = useState('');
+  const [roomNumber, setRoomNumber] = useState('');
   const [note, setNote] = useState('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
@@ -31,6 +32,7 @@ export default function ReservePage() {
       endAt: toIsoWithJstOffset(endAt),
       name,
       contact,
+      roomNumber,
       note
     });
     if (!result.ok) {
@@ -83,6 +85,9 @@ export default function ReservePage() {
 
         <label htmlFor="contact">連絡先</label>
         <input id="contact" value={contact} onChange={(e) => setContact(e.target.value)} required />
+
+        <label htmlFor="roomNumber">部屋番号</label>
+        <input id="roomNumber" value={roomNumber} onChange={(e) => setRoomNumber(e.target.value)} required />
 
         <label htmlFor="note">メモ</label>
         <textarea id="note" value={note} onChange={(e) => setNote(e.target.value)} />
