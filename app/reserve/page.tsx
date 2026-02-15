@@ -17,12 +17,14 @@ export default function ReservePage() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const [reservedId, setReservedId] = useState('');
+  const [copied, setCopied] = useState(false);
 
   const onSubmit = async (e: FormEvent) => {
     e.preventDefault();
     setLoading(true);
     setError('');
     setReservedId('');
+    setCopied(false);
     const result = await createReservation({
       slotId,
       startAt: toIsoWithJstOffset(startAt),
@@ -37,6 +39,16 @@ export default function ReservePage() {
       setReservedId(result.data.id);
     }
     setLoading(false);
+  };
+
+  const copyId = async () => {
+    if (!reservedId) return;
+    try {
+      await navigator.clipboard.writeText(reservedId);
+      setCopied(true);
+    } catch {
+      setCopied(false);
+    }
   };
 
   return (
@@ -57,11 +69,11 @@ export default function ReservePage() {
 
         <div className="row">
           <div>
-            <label htmlFor="startAt">開始</label>
+            <label htmlFor="startAt">開始日時</label>
             <input id="startAt" type="datetime-local" step={1800} value={startAt} onChange={(e) => setStartAt(e.target.value)} required />
           </div>
           <div>
-            <label htmlFor="endAt">終了</label>
+            <label htmlFor="endAt">終了日時</label>
             <input id="endAt" type="datetime-local" step={1800} value={endAt} onChange={(e) => setEndAt(e.target.value)} required />
           </div>
         </div>
@@ -81,7 +93,19 @@ export default function ReservePage() {
       </form>
 
       {error && <p className="error">{error}</p>}
-      {reservedId && <p className="success">予約ID: {reservedId}</p>}
+      {reservedId && (
+        <section className="panel">
+          <p className="success">予約が完了しました。</p>
+          <p>
+            予約ID: <strong>{reservedId}</strong>
+          </p>
+          <p>取消時に必要です。必ず保存してください。</p>
+          <button type="button" onClick={copyId}>
+            予約IDをコピー
+          </button>
+          {copied && <p className="success">コピーしました。</p>}
+        </section>
+      )}
     </>
   );
 }

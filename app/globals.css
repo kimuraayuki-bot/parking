@@ -169,11 +169,16 @@ table {
   font-size: 14px;
 }
 
+.table-wrap {
+  overflow-x: auto;
+}
+
 th,
 td {
   border-bottom: 1px solid var(--line);
   text-align: left;
   padding: 8px;
+  white-space: nowrap;
 }
 
 @media (max-width: 680px) {
