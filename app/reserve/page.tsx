@@ -7,6 +7,18 @@ import { toJapaneseError } from '@/lib/error-ja';
 
 const SLOT_COUNT = 16;
 
+function is30MinAligned(value: string) {
+  if (!value) return false;
+  const minute = Number(value.slice(14, 16));
+  return minute % 30 === 0;
+}
+
+function diffMinutes(start: string, end: string) {
+  const s = new Date(`${start}:00+09:00`).getTime();
+  const e = new Date(`${end}:00+09:00`).getTime();
+  return (e - s) / 60000;
+}
+
 export default function ReservePage() {
   const [slotId, setSlotId] = useState(1);
   const [startAt, setStartAt] = useState('');
@@ -26,6 +38,25 @@ export default function ReservePage() {
     setError('');
     setReservedId('');
     setCopied(false);
+
+    if (!is30MinAligned(startAt) || !is30MinAligned(endAt)) {
+      setError('時間は30分区切りで入力してください（例: 10:00 / 10:30）。');
+      setLoading(false);
+      return;
+    }
+
+    const minutes = diffMinutes(startAt, endAt);
+    if (minutes <= 0) {
+      setError('終了日時は開始日時より後にしてください。');
+      setLoading(false);
+      return;
+    }
+    if (minutes > 24 * 60) {
+      setError('予約は24時間以内で入力してください。');
+      setLoading(false);
+      return;
+    }
+
     const result = await createReservation({
       slotId,
       startAt: toIsoWithJstOffset(startAt),
@@ -56,6 +87,13 @@ export default function ReservePage() {
   return (
     <>
       <h2>予約作成</h2>
+
+      <section className="panel">
+        <p>入力時の注意点</p>
+        <p>予約は24時間以内で入力してください。</p>
+        <p>時間は30分区切りで入力してください。</p>
+      </section>
+
       <form className="panel" onSubmit={onSubmit}>
         <label htmlFor="slot">枠</label>
         <select id="slot" value={slotId} onChange={(e) => setSlotId(Number(e.target.value))}>

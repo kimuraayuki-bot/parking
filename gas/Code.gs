@@ -292,7 +292,7 @@ function validateCreateLikeInput_(input, settings) {
 
   const durationMin = (endAt.getTime() - startAt.getTime()) / 60000;
   const minDuration = toInt_(settings.MIN_DURATION_MIN, 30);
-  const maxDuration = toInt_(settings.MAX_DURATION_MIN, 1440);
+  const maxDuration = Math.min(toInt_(settings.MAX_DURATION_MIN, 1440), 1440);
   if (durationMin < minDuration || durationMin > maxDuration) {
     throw appError_('VALIDATION_ERROR', 'Duration is out of allowed range');
   }
