@@ -5,6 +5,7 @@ import { fetchAvailability } from '@/lib/web-client';
 import type { Reservation } from '@/lib/types';
 import { toJapaneseError } from '@/lib/error-ja';
 import { todayJstDateString } from '@/lib/date';
+import { formatSlotLabel } from '@/lib/slot-label';
 
 const STEP_MIN = 30;
 const CELL_COUNT = (24 * 60) / STEP_MIN;
@@ -111,7 +112,7 @@ export default function HomePage() {
             <tbody>
               {slots.map((slot) => (
                 <tr key={slot.slotId}>
-                  <td className="slot-head">{slot.name}</td>
+                  <td className="slot-head">{formatSlotLabel(slot.slotId)}</td>
                   {timeHeaders.map((h) => {
                     const { start, end } = cellRange(date, h.index);
                     const hit = parsedReservations.find((r) => r.slotId === slot.slotId && overlaps(r.start, r.end, start, end));

@@ -5,6 +5,7 @@ import { adminBlock, adminList } from '@/lib/web-client';
 import { todayJstDateString, toIsoWithJstOffset } from '@/lib/date';
 import { Reservation } from '@/lib/types';
 import { toJapaneseError } from '@/lib/error-ja';
+import { formatSlotLabel } from '@/lib/slot-label';
 
 function statusJa(status: Reservation['status']) {
   if (status === 'CONFIRMED') return '予約確定';
@@ -110,7 +111,7 @@ export default function AdminPage() {
             const n = idx + 1;
             return (
               <option key={n} value={n}>
-                枠{n}
+                {formatSlotLabel(n)}
               </option>
             );
           })}
@@ -156,7 +157,7 @@ export default function AdminPage() {
               {sortedItems.map((item) => (
                 <tr key={item.id}>
                   <td>{item.id}</td>
-                  <td>枠{item.slotId}</td>
+                  <td>{formatSlotLabel(item.slotId)}</td>
                   <td>{formatDateTime(item.startAt)}</td>
                   <td>{formatDateTime(item.endAt)}</td>
                   <td>{statusJa(item.status)}</td>

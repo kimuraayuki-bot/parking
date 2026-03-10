@@ -4,6 +4,7 @@ import { FormEvent, useState } from 'react';
 import { createReservation } from '@/lib/web-client';
 import { toIsoWithJstOffset } from '@/lib/date';
 import { toJapaneseError } from '@/lib/error-ja';
+import { formatSlotLabel } from '@/lib/slot-label';
 
 const SLOT_COUNT = 16;
 
@@ -101,7 +102,7 @@ export default function ReservePage() {
             const num = idx + 1;
             return (
               <option key={num} value={num}>
-                枠{num}
+                {formatSlotLabel(num)}
               </option>
             );
           })}
