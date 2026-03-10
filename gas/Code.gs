@@ -4,6 +4,7 @@ const SHEET_RESERVATIONS = 'Reservations';
 const SHEET_SETTINGS = 'Settings';
 const SHEET_LOGS = 'Logs';
 const FIXED_TIME_STEP_MIN = 30;
+const DEFAULT_ADMIN_KEY = 'admin1234';
 
 function doGet(e) {
   return handleRequest_('GET', e);
@@ -94,13 +95,17 @@ function appError_(code, message) {
 }
 
 function assertAdmin_(e, method) {
-  const settings = getSettings_();
-  const expected = settings.ADMIN_KEY || PropertiesService.getScriptProperties().getProperty('ADMIN_KEY');
+  const expected = getAdminKey_();
   const body = method === 'POST' ? getJsonBody_(e) : {};
   const provided = (e && e.parameter && e.parameter.adminKey) || body.adminKey || '';
   if (!expected || provided !== expected) {
     throw appError_('UNAUTHORIZED', 'Invalid admin key');
   }
+}
+
+function getAdminKey_() {
+  const settings = getSettings_();
+  return settings.ADMIN_KEY || PropertiesService.getScriptProperties().getProperty('ADMIN_KEY') || DEFAULT_ADMIN_KEY;
 }
 
 function getAvailability_(dateStr) {

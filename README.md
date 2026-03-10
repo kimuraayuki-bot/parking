@@ -1,4 +1,4 @@
-# 来客駐車場予約システム（Next.js + GAS + Spreadsheet）
+# グリーンプラネットハウス 駐車場予約（Next.js + GAS + Spreadsheet）
 
 来客用の駐車枠（1-16）を対象に、空き確認・予約・取消・管理（ブロック）を行うMVPです。
 
@@ -46,7 +46,7 @@ Google Spreadsheet に以下4シートを作成します。
 - `MIN_DURATION_MIN | 30`
 - `MAX_DURATION_MIN | 1440`
 - `CANCEL_DEADLINE_MIN | 0`
-- `ADMIN_KEY | 任意の管理キー`
+- `ADMIN_KEY | admin1234`
 
 ### Logs
 
@@ -62,7 +62,7 @@ Google Spreadsheet に以下4シートを作成します。
 4. アクセス: `全員`、実行ユーザー: `自分`
 5. 発行された `/exec` URL を控える
 
-`ADMIN_KEY` は `Settings` シート、または Script Properties の `ADMIN_KEY` で管理できます。
+`ADMIN_KEY` は `Settings` シート、または Script Properties の `ADMIN_KEY` で管理できます。どちらも未設定の場合は `admin1234` を使います。
 
 ## 3. Next.js 起動
 

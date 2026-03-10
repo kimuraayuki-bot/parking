@@ -93,6 +93,7 @@ export default function ReservePage() {
         <p>入力時の注意点</p>
         <p>予約は24時間以内で入力してください。</p>
         <p>時間は30分区切りで入力してください。</p>
+        <p>居住者用は枠1~8、企業様来客用は枠9~16です。</p>
       </section>
 
       <form className="panel" onSubmit={onSubmit}>
